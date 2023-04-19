@@ -83,16 +83,7 @@ SENTRY_OPTIONS["redis.clusters"] = {
     }
 }
 
-#########
-# Queue #
-#########
-
-# See https://develop.sentry.dev/services/queue/ for more
-# information on configuring your queue broker and workers. Sentry relies
-# on a Python framework called Celery to manage queues.
-
-rabbitmq_host = None
-if rabbitmq_host:
+if rabbitmq_host := None:
     BROKER_URL = "amqp://{username}:{password}@{host}/{vhost}".format(
         username="guest", password="guest", host=rabbitmq_host, vhost="/"
     )
@@ -195,24 +186,18 @@ SENTRY_DIGESTS = "sentry.digests.backends.redis.RedisBackend"
 SENTRY_WEB_HOST = "0.0.0.0"
 SENTRY_WEB_PORT = 9000
 SENTRY_WEB_OPTIONS = {
-    "http": "%s:%s" % (SENTRY_WEB_HOST, SENTRY_WEB_PORT),
+    "http": f"{SENTRY_WEB_HOST}:{SENTRY_WEB_PORT}",
     "protocol": "uwsgi",
-    # This is needed in order to prevent https://github.com/getsentry/sentry/blob/c6f9660e37fcd9c1bbda8ff4af1dcfd0442f5155/src/sentry/services/http.py#L70
     "uwsgi-socket": None,
     "so-keepalive": True,
-    # Keep this between 15s-75s as that's what Relay supports
     "http-keepalive": 15,
     "http-chunked-input": True,
-    # the number of web workers
     "workers": 3,
     "threads": 4,
     "memory-report": False,
-    # Some stuff so uwsgi will cycle workers sensibly
     "max-requests": 100000,
     "max-requests-delta": 500,
     "max-worker-lifetime": 86400,
-    # Duplicate options from sentry default just so we don't get
-    # bit by sentry changing a default value that we depend on.
     "thunder-lock": True,
     "log-x-forwarded-for": False,
     "buffer-size": 32768,
